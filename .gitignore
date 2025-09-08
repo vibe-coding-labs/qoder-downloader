@@ -1,0 +1,52 @@
+# 下载的安装包文件夹
+downloads/
+downloaders/
+
+# 编译后的二进制文件
+qoder-downloader
+qoder-downloader.exe
+
+# Go 编译产物
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# 测试二进制文件，用 go test -c 构建
+*.test
+
+# 输出的二进制文件
+*.out
+
+# Go 工作空间文件
+go.work
+
+# 依赖分析文件（保留go.sum用于依赖锁定）
+# go.sum
+
+# 临时文件
+*.tmp
+*.temp
+*.log
+
+# IDE 和编辑器配置文件
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# 操作系统生成的文件
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# 配置文件（如果包含敏感信息）
+config.local.*
+.env
+.env.local
