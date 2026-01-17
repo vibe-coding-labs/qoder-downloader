@@ -9,6 +9,19 @@
 
 浏览所有可用的 Qoder 版本及其下载链接：[Qoder 版本下载中心](https://vibe-coding-labs.github.io/qoder-downloader)
 
+## 自动发布新版本
+
+本工具支持自动检测新版本并创建GitHub Releases：
+
+```bash
+# 检测并自动发布新版本到GitHub Releases
+./qoder-downloader auto-release --token YOUR_GITHUB_TOKEN
+
+# 或者使用默认设置（需要先配置GitHub CLI）
+gh auth login  # 登录GitHub CLI
+./qoder-downloader auto-release
+```
+
 ## 功能特性
 
 - 🔍 **版本探测**: 自动探测 `https://download.qoder.com/release/` 下的所有可用版本

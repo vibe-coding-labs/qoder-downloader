@@ -347,11 +347,20 @@ const App: React.FC = () => {
                           </Button>]
                         }
                       >
-                        <Space>
-                          <Tag color="geekblue">{platform.os}</Tag>
-                          <Tag color="green">{platform.arch}</Tag>
-                          <Tag color="orange">{platform.ext}</Tag>
-                          <Text code>{platform.url}</Text>
+                        <Space direction="vertical" style={{ width: '100%' }}>
+                          <Space>
+                            <Tag color="geekblue">{platform.os}</Tag>
+                            <Tag color="green">{platform.arch}</Tag>
+                            <Tag color="orange">{platform.ext}</Tag>
+                          </Space>
+                          <div style={{ width: '100%' }}>
+                            <div>
+                              <Text strong>官方:</Text> <Text code>{platform.url}</Text>
+                            </div>
+                            <div>
+                              <Text strong>备用:</Text> <Text code>{`https://github.com/vibe-coding-labs/qoder-downloader/releases/download/v${versionData.version}/qoder-${versionData.version}-${platform.os.toLowerCase()}-${platform.arch}.${platform.ext}`}</Text>
+                            </div>
+                          </div>
                         </Space>
                       </Card>
                     </Col>
@@ -365,6 +374,13 @@ const App: React.FC = () => {
       
       <Footer style={{ textAlign: 'center', backgroundColor: '#f0f2f5', borderTop: '1px solid #e8e8e8' }}>
         Qoder 版本下载中心 ©{new Date().getFullYear()} - 提供所有版本的下载链接
+        <div style={{ marginTop: 16 }}>
+          <Space>
+            <a href="https://github.com/vibe-coding-labs/qoder-downloader/releases" target="_blank" rel="noopener noreferrer">GitHub Releases</a>
+            <span>|</span>
+            <a href="https://github.com/vibe-coding-labs/qoder-downloader" target="_blank" rel="noopener noreferrer">项目仓库</a>
+          </Space>
+        </div>
       </Footer>
     </Layout>
   );

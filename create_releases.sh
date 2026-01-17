@@ -1,13 +1,15 @@
 #!/bin/bash
 
-# Batch create GitHub releases for all downloaded versions
-# This script will create a release for each version in the downloads directory
-# and upload all corresponding files as assets
+# Script to create GitHub releases for newly detected Qoder versions
 
 set -e  # Exit on any error
 
-echo "🚀 Starting batch GitHub release creation..."
-echo "======================================="
+echo "Detecting new Qoder versions..."
+
+# Run the detection command to find all available versions
+go run main.go detect --max-major 3 --max-minor 20 --max-patch 50
+
+echo "Checking for new versions compared to existing releases..."
 
 # Check if gh CLI is installed
 if ! command -v gh &> /dev/null; then
@@ -23,87 +25,44 @@ if ! gh auth status &> /dev/null; then
     exit 1
 fi
 
-echo "✅ GitHub CLI is installed and authenticated"
-echo ""
+# Get the list of existing tags from GitHub
+EXISTING_TAGS=$(gh api repos/vibe-coding-labs/qoder-downloader/releases --jq '.[].tag_name' 2>/dev/null || echo "")
 
-# Get all version directories, sorted
-versions=$(ls -1 downloads/ | grep -E '^[0-9]+\.[0-9]+\.[0-9]+$' | sort -V)
+# Get the latest cached versions
+go run main.go detect --show-cached > temp_versions.txt
+CACHED_VERSIONS=$(sed -n '/Cached valid versions/,/^$/p' temp_versions.txt | tail -n +2 | head -n -1 | tr -d ' ')
 
-if [ -z "$versions" ]; then
-    echo "❌ No version directories found in downloads/"
-    exit 1
-fi
+echo "Cached versions:"
+echo "$CACHED_VERSIONS"
 
-echo "📦 Found versions to process:"
-echo "$versions"
-echo ""
-
-# Process each version
-for version in $versions; do
-    echo "🔄 Processing version $version..."
+# Loop through each cached version and create a release if it doesn't exist
+for version in $CACHED_VERSIONS; do
+    # Ensure version is in the right format (remove leading/trailing spaces)
+    version=$(echo $version | xargs)
     
-    version_dir="downloads/$version"
-    
-    # Check if version directory exists and has files
-    if [ ! -d "$version_dir" ]; then
-        echo "⚠️  Warning: Directory $version_dir does not exist, skipping..."
+    if [[ -z "$version" ]]; then
         continue
     fi
     
-    # Get all files in the version directory
-    files=$(find "$version_dir" -type f -name "qoder-*" | sort)
+    echo "Checking version: $version"
     
-    if [ -z "$files" ]; then
-        echo "⚠️  Warning: No qoder files found in $version_dir, skipping..."
-        continue
-    fi
-    
-    echo "📁 Files to upload for v$version:"
-    echo "$files" | sed 's/^/   - /'
-    
-    # Check if release already exists
-    if gh release view "v$version" &> /dev/null; then
-        echo "ℹ️  Release v$version already exists, skipping..."
-        echo ""
-        continue
-    fi
-    
-    # Create release notes based on version
-    release_notes="Release v$version
-
-This release includes:
-$(echo "$files" | while read -r file; do
-    filename=$(basename "$file")
-    echo "- $filename"
-done)
-
-Downloaded from official Qoder releases."
-    
-    # Create the release
-    echo "🏷️  Creating release v$version..."
-    
-    # Build gh release create command
-    gh_cmd="gh release create v$version"
-    
-    # Add all files as arguments
-    for file in $files; do
-        gh_cmd="$gh_cmd \"$file\""
-    done
-    
-    # Add release options
-    gh_cmd="$gh_cmd --title \"v$version\" --notes \"$release_notes\""
-    
-    # Execute the command
-    if eval "$gh_cmd"; then
-        echo "✅ Successfully created release v$version"
+    # Check if this version already exists as a tag
+    if echo "$EXISTING_TAGS" | grep -q "^v$version$"; then
+        echo "Version v$version already exists as a release, skipping..."
     else
-        echo "❌ Failed to create release v$version"
-        exit 1
+        echo "Creating release for version v$version"
+        
+        # Create a release for this version
+        gh release create "v$version" \
+            --title "Qoder v$version" \
+            --notes "Automated release for Qoder version $version" \
+            --target main
+        
+        echo "Successfully created release for v$version"
     fi
-    
-    echo ""
 done
 
-echo "🎉 All releases created successfully!"
-echo "📋 Summary:"
-gh release list --limit 50
+# Clean up temporary file
+rm -f temp_versions.txt
+
+echo "Release creation process completed!"

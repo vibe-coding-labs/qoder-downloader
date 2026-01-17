@@ -1,0 +1,24 @@
+{
+  "versions": {
+    "0.1.4": {
+      "exists": true,
+      "timestamp": "2026-01-18T04:08:00Z"
+    },
+    "0.1.5": {
+      "exists": true,
+      "timestamp": "2026-01-18T04:08:00Z"
+    },
+    "0.2.0": {
+      "exists": true,
+      "timestamp": "2026-01-18T04:08:00Z"
+    },
+    "0.2.1": {
+      "exists": true,
+      "timestamp": "2026-01-18T04:08:00Z"
+    }
+  },
+  "metadata": {
+    "last_updated": "2026-01-18T04:08:00Z",
+    "ttl_hours": 24
+  }
+}

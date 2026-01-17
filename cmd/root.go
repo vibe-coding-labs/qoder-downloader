@@ -38,6 +38,15 @@ func init() {
 	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.qoder-downloader.yaml)")
 	rootCmd.PersistentFlags().BoolP("verbose", "v", false, "verbose output")
 	rootCmd.PersistentFlags().StringP("cache-dir", "c", "", "cache directory (default is $HOME/.qoder-downloader)")
+	
+	// Add all child commands to the root command
+	rootCmd.AddCommand(downloadCmd)
+	rootCmd.AddCommand(detectCmd)
+	rootCmd.AddCommand(renameCmd)
+	rootCmd.AddCommand(releaseCmd)
+	rootCmd.AddCommand(bruteforceCmd)
+	rootCmd.AddCommand(downloadAllCmd)
+	rootCmd.AddCommand(autoReleaseCmd)
 }
 
 // initConfig reads in config file and ENV variables if set.
