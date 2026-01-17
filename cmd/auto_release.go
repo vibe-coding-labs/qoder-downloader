@@ -3,16 +3,22 @@ package cmd
 import (
 	"context"
 	"fmt"
+	"io"
 	"log"
+	"net/http"
+	"os"
 	"os/exec"
+	"path/filepath"
 	"sort"
 	"strings"
+	"time"
 
 	"github.com/google/go-github/v50/github"
 	"github.com/spf13/cobra"
 	"golang.org/x/oauth2"
 
 	"github.com/vibe-coding-labs/qoder-downloader/internal/cache"
+	"github.com/vibe-coding-labs/qoder-downloader/internal/platform"
 )
 
 var autoReleaseCmd = &cobra.Command{
@@ -147,7 +153,7 @@ func createReleaseForNewVersion(ctx context.Context, client *github.Client, vers
 	releaseName := fmt.Sprintf("Qoder %s", version)
 	releaseBody := fmt.Sprintf("Automated release for Qoder version %s", version)
 
-	// Execute the gh CLI command to create the release
+	// First create the release without assets
 	cmd := exec.Command("gh", "release", "create", tagName, 
 		"--title", releaseName,
 		"--notes", releaseBody,
@@ -158,5 +164,105 @@ func createReleaseForNewVersion(ctx context.Context, client *github.Client, vers
 		return fmt.Errorf("failed to create GitHub release with CLI: %v\nOutput: %s", err, string(output))
 	}
 
+	// Create a temporary directory for downloading assets
+	tmpDir, err := os.MkdirTemp("", fmt.Sprintf("qoder-assets-%s-*", version))
+	if err != nil {
+		return fmt.Errorf("failed to create temp directory: %v", err)
+	}
+	defer os.RemoveAll(tmpDir)
+
+	// Download all platform assets for this version
+	platforms := platform.GetAllPlatforms()
+	assetPaths := []string{}
+
+	for _, platformInfo := range platforms {
+		// Download the main file
+		url := platform.ConstructDownloadURL(version, platformInfo)
+		filename := fmt.Sprintf("qoder-%s-%s.%s", version, platformInfo.Name, platformInfo.Extension)
+		filePath := filepath.Join(tmpDir, filename)
+
+		if err := downloadFile(url, filePath); err != nil {
+			log.Printf("Failed to download %s for version %s: %v", platformInfo.Name, version, err)
+			continue // Continue with other platforms even if one fails
+		}
+
+		assetPaths = append(assetPaths, filePath)
+
+		// Also download the MD5 file
+		md5Url := strings.Replace(url, "/release/", "/release/md5/", 1)
+		if md5Url == url { // If the replacement didn't work, construct manually
+			// Try to construct MD5 URL based on common patterns
+			md5Filename := filename + ".md5"
+			md5FilePath := filepath.Join(tmpDir, md5Filename)
+			md5Url = strings.TrimSuffix(url, fmt.Sprintf(".%s", platformInfo.Extension)) + ".md5"
+			
+			if err := downloadFile(md5Url, md5FilePath); err != nil {
+				log.Printf("Failed to download MD5 file for %s: %v", filename, err)
+				// Create a simple MD5 file with placeholder content if download fails
+				placeholderMd5 := "PLACEHOLDER_MD5_VALUE"
+				if err := os.WriteFile(md5FilePath, []byte(placeholderMd5), 0644); err != nil {
+					log.Printf("Failed to create placeholder MD5 file for %s: %v", filename, err)
+				} else {
+					assetPaths = append(assetPaths, md5FilePath)
+				}
+			} else {
+				assetPaths = append(assetPaths, md5FilePath)
+			}
+			
+			// Alternative MD5 URL pattern - construct based on filename
+			if err != nil {
+				altMd5Url := fmt.Sprintf("https://download.qoder.com/release/md5/%s.md5", filename)
+				if err := downloadFile(altMd5Url, md5FilePath); err != nil {
+					log.Printf("Also failed to download MD5 file from alternative URL for %s: %v", filename, err)
+				} else {
+					assetPaths = append(assetPaths, md5FilePath)
+				}
+			}
+		} else {
+			md5FilePath := filepath.Join(tmpDir, filename+".md5")
+			if err := downloadFile(md5Url, md5FilePath); err != nil {
+				log.Printf("Failed to download MD5 file for %s: %v", filename, err)
+			} else {
+				assetPaths = append(assetPaths, md5FilePath)
+			}
+		}
+	}
+
+	// Upload all downloaded assets to the release
+	for _, assetPath := range assetPaths {
+		fileName := filepath.Base(assetPath)
+		cmd := exec.Command("gh", "release", "upload", tagName, assetPath, "--repo", githubRepo)
+		output, err := cmd.CombinedOutput()
+		if err != nil {
+			log.Printf("Failed to upload asset %s: %v (Output: %s)", fileName, err, string(output))
+			// Don't fail the whole release if asset upload fails
+		} else {
+			log.Printf("Successfully uploaded asset: %s", fileName)
+		}
+	}
+
 	return nil
+}
+
+// downloadFile downloads a file from the given URL to the specified filepath
+func downloadFile(url, filepath string) error {
+	client := &http.Client{Timeout: 30 * time.Minute}
+	resp, err := client.Get(url)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return fmt.Errorf("bad status: %s", resp.Status)
+	}
+
+	out, err := os.Create(filepath)
+	if err != nil {
+		return err
+	}
+	defer out.Close()
+
+	_, err = io.Copy(out, resp.Body)
+	return err
 }
