@@ -50,3 +50,80 @@ Thumbs.db
 config.local.*
 .env
 .env.local
+
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnp.cjs
+.pnp.loader.mjs
+
+# React
+build/
+dist/
+*.bundle.js
+*.bundle.js.map
+coverage/
+.nyc_output/
+
+# Vite
+.svelte-kit/
+
+# IDE
+.vs/
+.idea/
+*.iml
+*.iws
+
+# Editor
+.history
+.autosave
+.backup
+
+# macOS
+.AppleDouble
+.LSOverride
+.Icon?
+
+# Windows
+[C-c]ache/
+[D-d]esktop.ini
+[O-o]penBSD
+Thumbs.db
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+
+# Runtime data
+pids/
+*.pid
+*.seed
+*.pid.lock
+
+# Coverage directory used by tools like istanbul
+coverage/
+
+# Testing
+.jest-junit.xml
+.istanbul.yml
+
+# Production
+public/build/
+
+# Environment variables
+.env
+.env.test
+.env.production
+
+# Dependency directories
+node_modules/
+bower_components/
+
+# TypeScript
+*.tsbuildinfo

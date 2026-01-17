@@ -36,9 +36,9 @@ func init() {
 	rootCmd.AddCommand(detectCmd)
 
 	// Detection range flags
-	detectCmd.Flags().IntVar(&maxMajor, "max-major", 2, "Maximum major version to check")
-	detectCmd.Flags().IntVar(&maxMinor, "max-minor", 10, "Maximum minor version to check")
-	detectCmd.Flags().IntVar(&maxPatch, "max-patch", 20, "Maximum patch version to check")
+	detectCmd.Flags().IntVar(&maxMajor, "max-major", 3, "Maximum major version to check")
+	detectCmd.Flags().IntVar(&maxMinor, "max-minor", 20, "Maximum minor version to check")
+	detectCmd.Flags().IntVar(&maxPatch, "max-patch", 50, "Maximum patch version to check")
 
 	// Cache management flags
 	detectCmd.Flags().BoolVar(&showCached, "show-cached", false, "Show cached versions without detection")

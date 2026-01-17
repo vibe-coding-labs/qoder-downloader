@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Qoder 版本下载中心</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 30px;
+        }
+        
+        .latest-version {
+            background-color: #3498db;
+            color: white;
+            padding: 15px;
+            border-radius: 5px;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 1.2em;
+        }
+        
+        .version-section {
+            margin-bottom: 40px;
+        }
+        
+        .version-title {
+            background-color: #ecf0f1;
+            padding: 10px 15px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .version-title:hover {
+            background-color: #d5dbdb;
+        }
+        
+        .version-links {
+            display: none;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 5px;
+            margin-top: 10px;
+        }
+        
+        .version-links.show {
+            display: block;
+        }
+        
+        .link-item {
+            margin: 8px 0;
+            padding: 8px 15px;
+            background-color: white;
+            border-radius: 3px;
+            border-left: 4px solid #3498db;
+        }
+        
+        .link-item a {
+            text-decoration: none;
+            color: #2980b9;
+            font-weight: 500;
+        }
+        
+        .link-item a:hover {
+            text-decoration: underline;
+        }
+        
+        .platform-tag {
+            display: inline-block;
+            background-color: #e0e0e0;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.8em;
+            margin-left: 10px;
+        }
+        
+        .info-box {
+            background-color: #fff3cd;
+            border: 1px solid #ffeaa7;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        
+        .toggle-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 1.2em;
+            color: #7f8c8d;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Qoder 版本下载中心</h1>
+        
+        <div class="info-box">
+            <strong>说明：</strong>点击版本号展开查看该版本的下载链接，支持 macOS、Windows、Linux 平台。
+        </div>
+        
+        <div class="latest-version">
+            最新版本: <span id="latest-version">0.2.29</span>
+        </div>
+        
+        <div id="versions-container">
+            <!-- 版本列表将通过 JavaScript 动态生成 -->
+        </div>
+    </div>
+
+    <script>
+        // 版本数据
+        const versions = [
+            { version: "0.2.29", platforms: [
+                { os: "macOS", arch: "ARM64", ext: "dmg", url: "https://download.qoder.com/release/0.2.29/Qoder-darwin-arm64.dmg" },
+                { os: "macOS", arch: "x64", ext: "dmg", url: "https://download.qoder.com/release/0.2.29/Qoder-darwin-x64.dmg" },
+                { os: "Linux", arch: "x64", ext: "tar.gz", url: "https://download.qoder.com/release/0.2.29/Qoder-linux-x64.tar.gz" },
+                { os: "Windows", arch: "x64", ext: "zip", url: "https://download.qoder.com/release/0.2.29/Qoder-win32-x64.zip" }
+            ]},
+            { version: "0.2.28", platforms: [
+                { os: "macOS", arch: "ARM64", ext: "dmg", url: "https://download.qoder.com/release/0.2.28/Qoder-darwin-arm64.dmg" },
+                { os: "macOS", arch: "x64", ext: "dmg", url: "https://download.qoder.com/release/0.2.28/Qoder-darwin-x64.dmg" },
+                { os: "Linux", arch: "x64", ext: "tar.gz", url: "https://download.qoder.com/release/0.2.28/Qoder-linux-x64.tar.gz" },
+                { os: "Windows", arch: "x64", ext: "zip", url: "https://download.qoder.com/release/0.2.28/Qoder-win32-x64.zip" }
+            ]},
+            { version: "0.2.27", platforms: [
+                { os: "macOS", arch: "ARM64", ext: "dmg", url: "https://download.qoder.com/release/0.2.27/Qoder-darwin-arm64.dmg" },
+                { os: "macOS", arch: "x64", ext: "dmg", url: "https://download.qoder.com/release/0.2.27/Qoder-darwin-x64.dmg" },
+                { os: "Linux", arch: "x64", ext: "tar.gz", url: "https://download.qoder.com/release/0.2.27/Qoder-linux-x64.tar.gz" },
+                { os: "Windows", arch: "x64", ext: "zip", url: "https://download.qoder.com/release/0.2.27/Qoder-win32-x64.zip" }
+            ]},
+            { version: "0.2.26", platforms: [
+                { os: "macOS", arch: "ARM64", ext: "dmg", url: "https://download.qoder.com/release/0.2.26/Qoder-darwin-arm64.dmg" },
+                { os: "macOS", arch: "x64", ext: "dmg", url: "https://download.qoder.com/release/0.2.26/Qoder-darwin-x64.dmg" },
+                { os: "Linux", arch: "x64", ext: "tar.gz", url: "https://download.qoder.com/release/0.2.26/Qoder-linux-x64.tar.gz" },
+                { os: "Windows", arch: "x64", ext: "zip", url: "https://download.qoder.com/release/0.2.26/Qoder-win32-x64.zip" }
+            ]},
+            { version: "0.2.25", platforms: [
+                { os: "macOS", arch: "ARM64", ext: "dmg", url: "https://download.qoder.com/release/0.2.25/Qoder-darwin-arm64.dmg" },
+                { os: "macOS", arch: "x64", ext: "dmg", url: "https://download.qoder.com/release/0.2.25/Qoder-darwin-x64.dmg" },
+                { os: "Linux", arch: "x64", ext: "tar.gz", url: "https://download.qoder.com/release/0.2.25/Qoder-linux-x64.tar.gz" },
+                { os: "Windows", arch: "x64", ext: "zip", url: "https://download.qoder.com/release/0.2.25/Qoder-win32-x64.zip" }
+            ]},
+            { version: "0.2.24", platforms: [
+                { os: "macOS", arch: "ARM64", ext: "dmg", url: "https://download.qoder.com/release/0.2.24/Qoder-darwin-arm64.dmg" },
+                { os: "macOS", arch: "x64", ext: "dmg", url: "https://download.qoder.com/release/0.2.24/Qoder-darwin-x64.dmg" },
+                { os: "Linux", arch: "x64", ext: "tar.gz", url: "https://download.qoder.com/release/0.2.24/Qoder-linux-x64.tar.gz" },
+                { os: "Windows", arch: "x64", ext: "zip", url: "https://download.qoder.com/release/0.2.24/Qoder-win32-x64.zip" }
+            ]},
+            { version: "0.2.23", platforms: [
+                { os: "macOS", arch: "ARM64", ext: "dmg", url: "https://download.qoder.com/release/0.2.23/Qoder-darwin-arm64.dmg" },
+                { os: "macOS", arch: "x64", ext: "dmg", url: "https://download.qoder.com/release/0.2.23/Qoder-darwin-x64.dmg" },
+                { os: "Linux", arch: "x64", ext: "tar.gz", url: "https://download.qoder.com/release/0.2.23/Qoder-linux-x64.tar.gz" },
+                { os: "Windows", arch: "x64", ext: "zip", url: "https://download.qoder.com/release/0.2.23/Qoder-win32-x64.zip" }
+            ]},
+            { version: "0.2.22", platforms: [
+                { os: "macOS", arch: "ARM64", ext: "dmg", url: "https://download.qoder.com/release/0.2.22/Qoder-darwin-arm64.dmg" },
+                { os: "macOS", arch: "x64", ext: "dmg", url: "https://download.qoder.com/release/0.2.22/Qoder-darwin-x64.dmg" },
+                { os: "Linux", arch: "x64", ext: "tar.gz", url: "https://download.qoder.com/release/0.2.22/Qoder-linux-x64.tar.gz" },
+                { os: "Windows", arch: "x64", ext: "zip", url: "https://download.qoder.com/release/0.2.22/Qoder-win32-x64.zip" }
+            ]},
+            { version: "0.2.21", platforms: [
+                { os: "macOS", arch: "ARM64", ext: "dmg", url: "https://download.qoder.com/release/0.2.21/Qoder-darwin-arm64.dmg" },
+                { os: "macOS", arch: "x64", ext: "dmg", url: "https://download.qoder.com/release/0.2.21/Qoder-darwin-x64.dmg" },
+                { os: "Linux", arch: "x64", ext: "tar.gz", url: "https://download.qoder.com/release/0.2.21/Qoder-linux-x64.tar.gz" },
+                { os: "Windows", arch: "x64", ext: "zip", url: "https://download.qoder.com/release/0.2.21/Qoder-win32-x64.zip" }
+            ]},
+            { version: "0.2.29", platforms: [
+                { os: "macOS", arch: "ARM64", ext: "dmg", url: "https://download.qoder.com/release/0.2.29/Qoder-darwin-arm64.dmg" },
+                { os: "macOS", arch: "x64", ext: "dmg", url: "https://download.qoder.com/release/0.2.29/Qoder-darwin-x64.dmg" },
+                { os: "Linux", arch: "x64", ext: "tar.gz", url: "https://download.qoder.com/release/0.2.29/Qoder-linux-x64.tar.gz" },
+                { os: "Windows", arch: "x64", ext: "zip", url: "https://download.qoder.com/release/0.2.29/Qoder-win32-x64.zip" }
+            ]},
+            { version: "0.1.23", platforms: [
+                { os: "macOS", arch: "ARM64", ext: "dmg", url: "https://download.qoder.com/release/0.1.23/Qoder-darwin-arm64.dmg" },
+                { os: "macOS", arch: "x64", ext: "dmg", url: "https://download.qoder.com/release/0.1.23/Qoder-darwin-x64.dmg" },
+                { os: "Linux", arch: "x64", ext: "tar.gz", url: "https://download.qoder.com/release/0.1.23/Qoder-linux-x64.tar.gz" },
+                { os: "Windows", arch: "x64", ext: "zip", url: "https://download.qoder.com/release/0.1.23/Qoder-win32-x64.zip" }
+            ]},
+            { version: "0.1.22", platforms: [
+                { os: "macOS", arch: "ARM64", ext: "dmg", url: "https://download.qoder.com/release/0.1.22/Qoder-darwin-arm64.dmg" },
+                { os: "macOS", arch: "x64", ext: "dmg", url: "https://download.qoder.com/release/0.1.22/Qoder-darwin-x64.dmg" },
+                { os: "Linux", arch: "x64", ext: "tar.gz", url: "https://download.qoder.com/release/0.1.22/Qoder-linux-x64.tar.gz" },
+                { os: "Windows", arch: "x64", ext: "zip", url: "https://download.qoder.com/release/0.1.22/Qoder-win32-x64.zip" }
+            ]},
+            { version: "0.1.21", platforms: [
+                { os: "macOS", arch: "ARM64", ext: "dmg", url: "https://download.qoder.com/release/0.1.21/Qoder-darwin-arm64.dmg" },
+                { os: "macOS", arch: "x64", ext: "dmg", url: "https://download.qoder.com/release/0.1.21/Qoder-darwin-x64.dmg" },
+                { os: "Linux", arch: "x64", ext: "tar.gz", url: "https://download.qoder.com/release/0.1.21/Qoder-linux-x64.tar.gz" },
+                { os: "Windows", arch: "x64", ext: "zip", url: "https://download.qoder.com/release/0.1.21/Qoder-win32-x64.zip" }
+            ]},
+            { version: "0.1.20", platforms: [
+                { os: "macOS", arch: "ARM64", ext: "dmg", url: "https://download.qoder.com/release/0.1.20/Qoder-darwin-arm64.dmg" },
+                { os: "macOS", arch: "x64", ext: "dmg", url: "https://download.qoder.com/release/0.1.20/Qoder-darwin-x64.dmg" },
+                { os: "Linux", arch: "x64", ext: "tar.gz", url: "https://download.qoder.com/release/0.1.20/Qoder-linux-x64.tar.gz" },
+                { os: "Windows", arch: "x64", ext: "zip", url: "https://download.qoder.com/release/0.1.20/Qoder-win32-x64.zip" }
+            ]},
+            { version: "0.1.19", platforms: [
+                { os: "macOS", arch: "ARM64", ext: "dmg", url: "https://download.qoder.com/release/0.1.19/Qoder-darwin-arm64.dmg" },
+                { os: "macOS", arch: "x64", ext: "dmg", url: "https://download.qoder.com/release/0.1.19/Qoder-darwin-x64.dmg" },
+                { os: "Linux", arch: "x64", ext: "tar.gz", url: "https://download.qoder.com/release/0.1.19/Qoder-linux-x64.tar.gz" },
+                { os: "Windows", arch: "x64", ext: "zip", url: "https://download.qoder.com/release/0.1.19/Qoder-win32-x64.zip" }
+            ]},
+            { version: "0.1.18", platforms: [
+                { os: "macOS", arch: "ARM64", ext: "dmg", url: "https://download.qoder.com/release/0.1.18/Qoder-darwin-arm64.dmg" },
+                { os: "macOS", arch: "x64", ext: "dmg", url: "https://download.qoder.com/release/0.1.18/Qoder-darwin-x64.dmg" },
+                { os: "Linux", arch: "x64", ext: "tar.gz", url: "https://download.qoder.com/release/0.1.18/Qoder-linux-x64.tar.gz" },
+                { os: "Windows", arch: "x64", ext: "zip", url: "https://download.qoder.com/release/0.1.18/Qoder-win32-x64.zip" }
+            ]},
+            { version: "0.1.17", platforms: [
+                { os: "macOS", arch: "ARM64", ext: "dmg", url: "https://download.qoder.com/release/0.1.17/Qoder-darwin-arm64.dmg" },
+                { os: "macOS", arch: "x64", ext: "dmg", url: "https://download.qoder.com/release/0.1.17/Qoder-darwin-x64.dmg" },
+                { os: "Linux", arch: "x64", ext: "tar.gz", url: "https://download.qoder.com/release/0.1.17/Qoder-linux-x64.tar.gz" },
+                { os: "Windows", arch: "x64", ext: "zip", url: "https://download.qoder.com/release/0.1.17/Qoder-win32-x64.zip" }
+            ]},
+            { version: "0.1.16", platforms: [
+                { os: "macOS", arch: "ARM64", ext: "dmg", url: "https://download.qoder.com/release/0.1.16/Qoder-darwin-arm64.dmg" },
+                { os: "macOS", arch: "x64", ext: "dmg", url: "https://download.qoder.com/release/0.1.16/Qoder-darwin-x64.dmg" },
+                { os: "Linux", arch: "x64", ext: "tar.gz", url: "https://download.qoder.com/release/0.1.16/Qoder-linux-x64.tar.gz" },
+                { os: "Windows", arch: "x64", ext: "zip", url: "https://download.qoder.com/release/0.1.16/Qoder-win32-x64.zip" }
+            ]},
+            { version: "0.1.15", platforms: [
+                { os: "macOS", arch: "ARM64", ext: "dmg", url: "https://download.qoder.com/release/0.1.15/Qoder-darwin-arm64.dmg" },
+                { os: "macOS", arch: "x64", ext: "dmg", url: "https://download.qoder.com/release/0.1.15/Qoder-darwin-x64.dmg" },
+                { os: "Linux", arch: "x64", ext: "tar.gz", url: "https://download.qoder.com/release/0.1.15/Qoder-linux-x64.tar.gz" },
+                { os: "Windows", arch: "x64", ext: "zip", url: "https://download.qoder.com/release/0.1.15/Qoder-win32-x64.zip" }
+            ]},
+            { version: "0.1.13", platforms: [
+                { os: "macOS", arch: "ARM64", ext: "dmg", url: "https://download.qoder.com/release/0.1.13/Qoder-darwin-arm64.dmg" },
+                { os: "macOS", arch: "x64", ext: "dmg", url: "https://download.qoder.com/release/0.1.13/Qoder-darwin-x64.dmg" },
+                { os: "Linux", arch: "x64", ext: "tar.gz", url: "https://download.qoder.com/release/0.1.13/Qoder-linux-x64.tar.gz" },
+                { os: "Windows", arch: "x64", ext: "zip", url: "https://download.qoder.com/release/0.1.13/Qoder-win32-x64.zip" }
+            ]},
+            { version: "0.1.12", platforms: [
+                { os: "macOS", arch: "ARM64", ext: "dmg", url: "https://download.qoder.com/release/0.1.12/Qoder-darwin-arm64.dmg" },
+                { os: "macOS", arch: "x64", ext: "dmg", url: "https://download.qoder.com/release/0.1.12/Qoder-darwin-x64.dmg" },
+                { os: "Linux", arch: "x64", ext: "tar.gz", url: "https://download.qoder.com/release/0.1.12/Qoder-linux-x64.tar.gz" },
+                { os: "Windows", arch: "x64", ext: "zip", url: "https://download.qoder.com/release/0.1.12/Qoder-win32-x64.zip" }
+            ]},
+            { version: "0.1.11", platforms: [
+                { os: "macOS", arch: "ARM64", ext: "dmg", url: "https://download.qoder.com/release/0.1.11/Qoder-darwin-arm64.dmg" },
+                { os: "macOS", arch: "x64", ext: "dmg", url: "https://download.qoder.com/release/0.1.11/Qoder-darwin-x64.dmg" },
+                { os: "Linux", arch: "x64", ext: "tar.gz", url: "https://download.qoder.com/release/0.1.11/Qoder-linux-x64.tar.gz" },
+                { os: "Windows", arch: "x64", ext: "zip", url: "https://download.qoder.com/release/0.1.11/Qoder-win32-x64.zip" }
+            ]},
+            { version: "0.1.10", platforms: [
+                { os: "macOS", arch: "ARM64", ext: "dmg", url: "https://download.qoder.com/release/0.1.10/Qoder-darwin-arm64.dmg" },
+                { os: "macOS", arch: "x64", ext: "dmg", url: "https://download.qoder.com/release/0.1.10/Qoder-darwin-x64.dmg" },
+                { os: "Linux", arch: "x64", ext: "tar.gz", url: "https://download.qoder.com/release/0.1.10/Qoder-linux-x64.tar.gz" },
+                { os: "Windows", arch: "x64", ext: "zip", url: "https://download.qoder.com/release/0.1.10/Qoder-win32-x64.zip" }
+            ]},
+            { version: "0.1.9", platforms: [
+                { os: "macOS", arch: "ARM64", ext: "dmg", url: "https://download.qoder.com/release/0.1.9/Qoder-darwin-arm64.dmg" },
+                { os: "macOS", arch: "x64", ext: "dmg", url: "https://download.qoder.com/release/0.1.9/Qoder-darwin-x64.dmg" },
+                { os: "Linux", arch: "x64", ext: "tar.gz", url: "https://download.qoder.com/release/0.1.9/Qoder-linux-x64.tar.gz" },
+                { os: "Windows", arch: "x64", ext: "zip", url: "https://download.qoder.com/release/0.1.9/Qoder-win32-x64.zip" }
+            ]},
+            { version: "0.1.8", platforms: [
+                { os: "macOS", arch: "ARM64", ext: "dmg", url: "https://download.qoder.com/release/0.1.8/Qoder-darwin-arm64.dmg" },
+                { os: "macOS", arch: "x64", ext: "dmg", url: "https://download.qoder.com/release/0.1.8/Qoder-darwin-x64.dmg" },
+                { os: "Linux", arch: "x64", ext: "tar.gz", url: "https://download.qoder.com/release/0.1.8/Qoder-linux-x64.tar.gz" },
+                { os: "Windows", arch: "x64", ext: "zip", url: "https://download.qoder.com/release/0.1.8/Qoder-win32-x64.zip" }
+            ]},
+            { version: "0.1.7", platforms: [
+                { os: "macOS", arch: "ARM64", ext: "dmg", url: "https://download.qoder.com/release/0.1.7/Qoder-darwin-arm64.dmg" },
+                { os: "macOS", arch: "x64", ext: "dmg", url: "https://download.qoder.com/release/0.1.7/Qoder-darwin-x64.dmg" },
+                { os: "Linux", arch: "x64", ext: "tar.gz", url: "https://download.qoder.com/release/0.1.7/Qoder-linux-x64.tar.gz" },
+                { os: "Windows", arch: "x64", ext: "zip", url: "https://download.qoder.com/release/0.1.7/Qoder-win32-x64.zip" }
+            ]},
+            { version: "0.1.6", platforms: [
+                { os: "macOS", arch: "ARM64", ext: "dmg", url: "https://download.qoder.com/release/0.1.6/Qoder-darwin-arm64.dmg" },
+                { os: "macOS", arch: "x64", ext: "dmg", url: "https://download.qoder.com/release/0.1.6/Qoder-darwin-x64.dmg" },
+                { os: "Linux", arch: "x64", ext: "tar.gz", url: "https://download.qoder.com/release/0.1.6/Qoder-linux-x64.tar.gz" },
+                { os: "Windows", arch: "x64", ext: "zip", url: "https://download.qoder.com/release/0.1.6/Qoder-win32-x64.zip" }
+            ]},
+            { version: "0.1.5", platforms: [
+                { os: "macOS", arch: "ARM64", ext: "dmg", url: "https://download.qoder.com/release/0.1.5/Qoder-darwin-arm64.dmg" },
+                { os: "macOS", arch: "x64", ext: "dmg", url: "https://download.qoder.com/release/0.1.5/Qoder-darwin-x64.dmg" },
+                { os: "Linux", arch: "x64", ext: "tar.gz", url: "https://download.qoder.com/release/0.1.5/Qoder-linux-x64.tar.gz" },
+                { os: "Windows", arch: "x64", ext: "zip", url: "https://download.qoder.com/release/0.1.5/Qoder-win32-x64.zip" }
+            ]},
+            { version: "0.1.4", platforms: [
+                { os: "macOS", arch: "ARM64", ext: "dmg", url: "https://download.qoder.com/release/0.1.4/Qoder-darwin-arm64.dmg" },
+                { os: "macOS", arch: "x64", ext: "dmg", url: "https://download.qoder.com/release/0.1.4/Qoder-darwin-x64.dmg" },
+                { os: "Linux", arch: "x64", ext: "tar.gz", url: "https://download.qoder.com/release/0.1.4/Qoder-linux-x64.tar.gz" },
+                { os: "Windows", arch: "x64", ext: "zip", url: "https://download.qoder.com/release/0.1.4/Qoder-win32-x64.zip" }
+            ]},
+            { version: "0.1.3", platforms: [
+                { os: "macOS", arch: "ARM64", ext: "dmg", url: "https://download.qoder.com/release/0.1.3/Qoder-darwin-arm64.dmg" },
+                { os: "macOS", arch: "x64", ext: "dmg", url: "https://download.qoder.com/release/0.1.3/Qoder-darwin-x64.dmg" },
+                { os: "Linux", arch: "x64", ext: "tar.gz", url: "https://download.qoder.com/release/0.1.3/Qoder-linux-x64.tar.gz" },
+                { os: "Windows", arch: "x64", ext: "zip", url: "https://download.qoder.com/release/0.1.3/Qoder-win32-x64.zip" }
+            ]},
+            { version: "0.1.1", platforms: [
+                { os: "macOS", arch: "ARM64", ext: "dmg", url: "https://download.qoder.com/release/0.1.1/Qoder-darwin-arm64.dmg" },
+                { os: "macOS", arch: "x64", ext: "dmg", url: "https://download.qoder.com/release/0.1.1/Qoder-darwin-x64.dmg" },
+                { os: "Linux", arch: "x64", ext: "tar.gz", url: "https://download.qoder.com/release/0.1.1/Qoder-linux-x64.tar.gz" },
+                { os: "Windows", arch: "x64", ext: "zip", url: "https://download.qoder.com/release/0.1.1/Qoder-win32-x64.zip" }
+            ]},
+            { version: "0.1.0", platforms: [
+                { os: "macOS", arch: "ARM64", ext: "dmg", url: "https://download.qoder.com/release/0.1.0/Qoder-darwin-arm64.dmg" },
+                { os: "macOS", arch: "x64", ext: "dmg", url: "https://download.qoder.com/release/0.1.0/Qoder-darwin-x64.dmg" },
+                { os: "Linux", arch: "x64", ext: "tar.gz", url: "https://download.qoder.com/release/0.1.0/Qoder-linux-x64.tar.gz" },
+                { os: "Windows", arch: "x64", ext: "zip", url: "https://download.qoder.com/release/0.1.0/Qoder-win32-x64.zip" }
+            ]},
+            { version: "0.0.1", platforms: [
+                { os: "macOS", arch: "ARM64", ext: "dmg", url: "https://download.qoder.com/release/0.0.1/Qoder-darwin-arm64.dmg" },
+                { os: "macOS", arch: "x64", ext: "dmg", url: "https://download.qoder.com/release/0.0.1/Qoder-darwin-x64.dmg" },
+                { os: "Linux", arch: "x64", ext: "tar.gz", url: "https://download.qoder.com/release/0.0.1/Qoder-linux-x64.tar.gz" },
+                { os: "Windows", arch: "x64", ext: "zip", url: "https://download.qoder.com/release/0.0.1/Qoder-win32-x64.zip" }
+            ]}
+        ];
+
+        // 页面加载完成后渲染版本列表
+        document.addEventListener('DOMContentLoaded', function() {
+            const container = document.getElementById('versions-container');
+            
+            // 按版本号排序（降序，最新版本在前）
+            versions.sort((a, b) => {
+                const [aMajor, aMinor, aPatch] = a.version.split('.').map(Number);
+                const [bMajor, bMinor, bPatch] = b.version.split('.').map(Number);
+                
+                if (aMajor !== bMajor) return bMajor - aMajor;
+                if (aMinor !== bMinor) return bMinor - aMinor;
+                return bPatch - aPatch;
+            });
+            
+            // 渲染每个版本
+            versions.forEach(versionData => {
+                const versionDiv = document.createElement('div');
+                versionDiv.className = 'version-section';
+                
+                const titleDiv = document.createElement('div');
+                titleDiv.className = 'version-title';
+                titleDiv.innerHTML = `
+                    <span>${versionData.version}</span>
+                    <button class="toggle-btn" onclick="toggleVersion('${versionData.version}')">▼</button>
+                `;
+                
+                const linksDiv = document.createElement('div');
+                linksDiv.id = `links-${versionData.version}`;
+                linksDiv.className = 'version-links';
+                
+                versionData.platforms.forEach(platform => {
+                    const linkItem = document.createElement('div');
+                    linkItem.className = 'link-item';
+                    
+                    let platformTag = '';
+                    if (platform.os === 'macOS') platformTag = `<span class="platform-tag">macOS</span>`;
+                    else if (platform.os === 'Windows') platformTag = `<span class="platform-tag">Windows</span>`;
+                    else if (platform.os === 'Linux') platformTag = `<span class="platform-tag">Linux</span>`;
+                    
+                    linkItem.innerHTML = `
+                        <a href="${platform.url}" target="_blank">${platform.os} ${platform.arch} (${platform.ext})</a>
+                        ${platformTag}
+                    `;
+                    
+                    linksDiv.appendChild(linkItem);
+                });
+                
+                versionDiv.appendChild(titleDiv);
+                versionDiv.appendChild(linksDiv);
+                container.appendChild(versionDiv);
+            });
+        });
+
+        // 切换版本详情显示/隐藏
+        function toggleVersion(version) {
+            const linksDiv = document.getElementById(`links-${version}`);
+            const button = event.target;
+            
+            if (linksDiv.classList.contains('show')) {
+                linksDiv.classList.remove('show');
+                button.textContent = '▼';
+            } else {
+                linksDiv.classList.add('show');
+                button.textContent = '▲';
+            }
+        }
+    </script>
+</body>
+</html>
