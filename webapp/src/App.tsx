@@ -20,6 +20,69 @@ interface Version {
 }
 
 const App: React.FC = () => {
+  // 获取GitHub仓库Star数的函数
+  const fetchGitHubStars = async () => {
+    // 检查缓存
+    const cacheKey = 'github-stars-cache';
+    const cachedData = localStorage.getItem(cacheKey);
+    
+    if (cachedData) {
+      const { stars, timestamp } = JSON.parse(cachedData);
+      const now = new Date().getTime();
+      
+      // 如果缓存未过期（1小时内），则使用缓存数据
+      if (now - timestamp < 60 * 60 * 1000) { // 1小时 = 3600000毫秒
+        return stars;
+      }
+    }
+    
+    try {
+      const response = await fetch('https://api.github.com/repos/vibe-coding-labs/qoder-downloader');
+      const data = await response.json();
+      const stars = data.stargazers_count;
+      
+      // 存储到缓存
+      localStorage.setItem(cacheKey, JSON.stringify({
+        stars,
+        timestamp: new Date().getTime()
+      }));
+      
+      return stars;
+    } catch (error) {
+      console.error('获取GitHub Star数失败:', error);
+      return 0; // 返回0表示获取失败
+    }
+  };
+  
+  // 组件挂载后获取Star数
+  useEffect(() => {
+    const loadStars = async () => {
+      const stars = await fetchGitHubStars();
+      const starsElement = document.getElementById('github-stars');
+      if (starsElement) {
+        starsElement.textContent = stars.toString();
+      }
+    };
+    
+    loadStars();
+    
+    // 为GitHub徽标添加悬停事件
+    setTimeout(() => {
+      const githubLink = document.querySelector('a[href="https://github.com/vibe-coding-labs/qoder-downloader"]') as HTMLAnchorElement;
+      if (githubLink) {
+        const tooltip = githubLink.querySelector('#star-tooltip') as HTMLElement;
+        if (tooltip) {
+          githubLink.addEventListener('mouseenter', () => {
+            tooltip.style.opacity = '1';
+          });
+          
+          githubLink.addEventListener('mouseleave', () => {
+            tooltip.style.opacity = '0';
+          });
+        }
+      }
+    }, 100); // 延迟执行以确保DOM元素已渲染
+  }, []);
   // 版本数据
   const versions = [
     { version: "0.2.29", platforms: [
