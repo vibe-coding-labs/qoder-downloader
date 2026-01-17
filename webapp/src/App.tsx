@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Layout, Typography, Card, Collapse, Tag, Space, Button, Statistic, Row, Col } from 'antd';
 import { DownloadOutlined, CheckCircleOutlined, ClockCircleOutlined, DesktopOutlined } from '@ant-design/icons';
 
@@ -238,12 +238,43 @@ const App: React.FC = () => {
           </Title>
           <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
             <Text style={{ color: 'rgba(255, 255, 255, 0.85)' }}>现代化的版本管理界面</Text>
-            <a href="https://github.com/vibe-coding-labs/qoder-downloader" target="_blank" rel="noopener noreferrer">
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ verticalAlign: 'middle', color: 'white' }}>
-                <path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4" />
-                <path d="M9 18c-4.51 2-5-2-7-2" />
-              </svg>
-            </a>
+            <div style={{ position: 'relative', display: 'inline-block' }}>
+              <a 
+                href="https://github.com/vibe-coding-labs/qoder-downloader" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                style={{ textDecoration: 'none' }}
+                title="给我们的项目点赞!"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ verticalAlign: 'middle', color: 'white' }}>
+                  <path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4" />
+                  <path d="M9 18c-4.51 2-5-2-7-2" />
+                </svg>
+                <span style={{ marginLeft: '4px', color: 'white', fontSize: '14px' }} id="github-stars">0</span>
+              </a>
+              <div 
+                id="star-tooltip"
+                style={{
+                  position: 'absolute',
+                  bottom: '100%',
+                  left: '50%',
+                  transform: 'translateX(-50%)',
+                  backgroundColor: '#191c24',
+                  color: 'white',
+                  padding: '4px 8px',
+                  borderRadius: '4px',
+                  fontSize: '12px',
+                  whiteSpace: 'nowrap',
+                  zIndex: 1000,
+                  opacity: 0,
+                  transition: 'opacity 0.2s',
+                  pointerEvents: 'none',
+                  marginBottom: '4px'
+                }}
+              >
+                给我们的项目点赞!
+              </div>
+            </div>
           </div>
         </div>
       </Header>
@@ -386,5 +417,67 @@ const App: React.FC = () => {
     </Layout>
   );
 };
+
+// 获取GitHub仓库Star数的函数
+const fetchGitHubStars = async () => {
+  // 检查缓存
+  const cacheKey = 'github-stars-cache';
+  const cachedData = localStorage.getItem(cacheKey);
+  
+  if (cachedData) {
+    const { stars, timestamp } = JSON.parse(cachedData);
+    const now = new Date().getTime();
+    
+    // 如果缓存未过期（1小时内），则使用缓存数据
+    if (now - timestamp < 60 * 60 * 1000) { // 1小时 = 3600000毫秒
+      return stars;
+    }
+  }
+  
+  try {
+    const response = await fetch('https://api.github.com/repos/vibe-coding-labs/qoder-downloader');
+    const data = await response.json();
+    const stars = data.stargazers_count;
+    
+    // 存储到缓存
+    localStorage.setItem(cacheKey, JSON.stringify({
+      stars,
+      timestamp: new Date().getTime()
+    }));
+    
+    return stars;
+  } catch (error) {
+    console.error('获取GitHub Star数失败:', error);
+    return 0; // 返回0表示获取失败
+  }
+};
+
+// 组件挂载后获取Star数
+useEffect(() => {
+  const loadStars = async () => {
+    const stars = await fetchGitHubStars();
+    const starsElement = document.getElementById('github-stars');
+    if (starsElement) {
+      starsElement.textContent = stars.toString();
+    }
+  };
+  
+  loadStars();
+  
+  // 为GitHub徽标添加悬停事件
+  const githubLink = document.querySelector('#root a[href="https://github.com/vibe-coding-labs/qoder-downloader"]') as HTMLAnchorElement;
+  if (githubLink) {
+    const tooltip = githubLink.querySelector('#star-tooltip') as HTMLElement;
+    if (tooltip) {
+      githubLink.addEventListener('mouseenter', () => {
+        tooltip.style.opacity = '1';
+      });
+      
+      githubLink.addEventListener('mouseleave', () => {
+        tooltip.style.opacity = '0';
+      });
+    }
+  }
+}, []);
 
 export default App;
