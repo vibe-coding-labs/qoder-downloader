@@ -5,6 +5,10 @@
 一个用Go语言编写的命令行工具，用于探测和发现 Qoder 编辑器的可用版本。
 目前所有可用安装文件已经下载好上传到了Release，请君自取，或者clone此工具自行编译下载。
 
+## 在线版本
+
+浏览所有可用的 Qoder 版本及其下载链接：[Qoder 版本下载中心](https://vibe-coding-labs.github.io/qoder-downloader)
+
 ## 功能特性
 
 - 🔍 **版本探测**: 自动探测 `https://download.qoder.com/release/` 下的所有可用版本
